@@ -1,8 +1,6 @@
 # Alembic Retime
 
-## (alembic_retime)
-
-* Description: Percentage based alembic & mograph cache retimer.
+* Description: Percentage based alembic & mograph cache retimer for Cinema 4D.
 * Copyright: AXISFX LTD
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
