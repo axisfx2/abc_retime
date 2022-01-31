@@ -1,0 +1,11 @@
+STRINGTABLE abcretime
+{
+	abcretime								"Alembic Retime";
+
+	ABC_START_FRAME							"Start Frame";
+	ABC_OFFSET								"Offset";
+	ABC_SPEED 								"Speed";
+	ABC_START_FROM_DOC						"Start Frame from Document";
+	ABC_APPLY_CHILDREN						"Apply to Children";
+	ABC_RESET_CHILDREN						"Reset Children's Animation Mode";
+}
