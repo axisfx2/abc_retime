@@ -7,11 +7,11 @@
 * Release Date: 31.01.2022
 * Current Version: 1.0.0
 
-## Changes
+## Supported Objects/Tags
 
-### 1.0.0   |  31.01.2022
-
-* Initial release
+* Alembic Object
+* Point Cache Tag
+* Mograph Cache Tag
 
 ## Installation
 
@@ -20,8 +20,8 @@
 * Extract to the Cinema 4D R2X/Plugins folder
 * Restart Cinema 4D
 
-## Supported Objects/Tags
+## Changes
 
-* Alembic Object
-* Point Cache Tag
-* Mograph Cache Tag
+### 1.0.0   |  31.01.2022
+
+* Initial release
