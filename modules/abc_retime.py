@@ -6,6 +6,7 @@ from math import floor
 mograph_cache_tag = 1019337
 point_cache_tag = 1021302
 alembic_obj = c4d.Oalembicgenerator
+xp_cache = 1028775
 
 class abc_retime(c4d.plugins.TagData):
     
@@ -21,6 +22,8 @@ class abc_retime(c4d.plugins.TagData):
         self.InitAttr(op, float, c4d.ABC_SPEED)
         self.InitAttr(op, bool, c4d.ABC_APPLY_CHILDREN)
         self.InitAttr(op, int, c4d.ABC_RESET_CHILDREN)
+        self.InitAttr(op, bool, c4d.ABC_RETIME_TYPE)
+        self.InitAttr(op, c4d.BaseTime, c4d.ABC_FRAME)
 
         # defaults
         op[c4d.ABC_SPEED] = 1.0
@@ -29,11 +32,46 @@ class abc_retime(c4d.plugins.TagData):
 
         return True
 
+    # show/hide speed/frame parameter
+    def GetDDescription(self, node, description, flags):
+        if not description.LoadDescription(node.GetType()):
+            return False  
+
+        singleID = description.GetSingleDescID()  
+
+        for idx, i in enumerate([c4d.ABC_FRAME, c4d.ABC_SPEED]):
+            paramID = c4d.DescID(c4d.DescLevel(i))
+
+            if singleID is None or paramID.IsPartOf(singleID)[0]:  
+                bc = description.GetParameterI(paramID, None)   
+                if node[c4d.ABC_RETIME_TYPE]:
+                    bc[c4d.DESC_HIDE] = idx!=0
+                else:
+                    bc[c4d.DESC_HIDE] = idx==0
+
+        return (True, flags | c4d.DESCFLAGS_DESC_LOADED)
+
+    # enable/disable start frame
+    def GetDEnabling(self, node, id, t_data, flags, itemdesc):
+        data = node.GetDataInstance()
+        if data is None:
+            return
+
+        ID = id[0].id
+
+        retime_type = node[c4d.ABC_RETIME_TYPE]
+
+        if ID in [c4d.ABC_START_FRAME]:
+            return not retime_type
+
+        # elif ID == c4d.ABC_START_FRAME:
+        #     return retime_type
+
+        return True
+
     def Execute(self, op, doc, obj, bt, priority, flags):
         if op is None:
             return c4d.EXECUTIONRESULT_OK
-
-        # obj = op.GetObject()
 
         # set G variables
         self.op = op
@@ -41,22 +79,29 @@ class abc_retime(c4d.plugins.TagData):
 
         self.doc = doc
         self.fps = doc.GetFps()
-        self.doc_frame = doc.GetTime().GetFrame(self.fps)
+        self.doc_time = doc.GetTime()
+        self.doc_frame = self.doc_time.GetFrame(self.fps)
         self.start_frame = op[c4d.ABC_START_FRAME]
         
+        # get basetime from frame parm
+        if op[c4d.ABC_RETIME_TYPE]:
+            _output = op[c4d.ABC_FRAME]
+            _output += c4d.BaseTime(
+                op[c4d.ABC_OFFSET], self.fps
+            )
+
+
         # calculate frame from speed
-        _output, _mix = self.calcFrame()
-        _output_basetime = _output
+        else:
+            _output, _mix = self.calcFrame()
         
         # apply to objects
         if op[c4d.ABC_APPLY_CHILDREN]:
             for child in IterateHierarchy(obj):
-                self.setTimeValue(child, _output_basetime)
+                self.setTimeValue(child, _output)
 
         else:
-            self.setTimeValue(obj, _output_basetime)
-
-        # print('output', _output, _output_basetime.GetFrame(self.fps))
+            self.setTimeValue(obj, _output)
 
         return c4d.EXECUTIONRESULT_OK
 
@@ -186,17 +231,22 @@ class abc_retime(c4d.plugins.TagData):
         return _output, _mix
 
     def setTimeValue(self, obj, _output):
+
         # no object
         if obj == None:
             return
 
         # mograph cache tag
         elif obj.GetTag(mograph_cache_tag):
+            _output -= self.doc_time
+
             tag = obj.GetTag(1019337)
             tag[c4d.MGCACHETAG_OFFSET] = _output
 
         # point cache tag
         elif obj.GetTag(point_cache_tag):
+            _output -= self.doc_time
+
             tag = obj.GetTag(1021302)
             tag[c4d.ID_CA_GEOMCACHE_TAG_CACHE_OFFSET] = _output
 
@@ -206,13 +256,23 @@ class abc_retime(c4d.plugins.TagData):
             obj[c4d.ALEMBIC_INTERPOLATION] = True
             obj[c4d.ALEMBIC_ANIMATION_FRAME] = _output
 
+        # xp cache
+        elif obj.GetType() == xp_cache:
+            obj[c4d.XOCA_CACHE_RETIMING] = 2
+            obj[c4d.XOCA_CACHE_TIME] = _output.Get()
+
 def resetABC(op):
     children = IterateHierarchy(op)
 
     for obj in children:
         if obj != op:
+            # alembic
             if obj.GetType() == alembic_obj:
                 c4d.CallButton(obj, c4d.ALEMBIC_ANIMATION_RESET)
+            
+            # xp cache
+            elif obj.GetType() == xp_cache:
+                obj[c4d.XOCA_CACHE_TIME] = 0
 
 # hierarchy iteration
 # https://developers.maxon.net/?p=596

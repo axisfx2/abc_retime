@@ -12,6 +12,7 @@
 * Alembic Object
 * Point Cache Tag
 * Mograph Cache Tag
+* X-Particles Cache
 
 ## Installation
 
@@ -22,6 +23,13 @@
 
 ## Changes
 
-### 1.0.0   |  31.01.2022
+### 1.0.1  |  01.02.2022
+
+* Fixes for point & mograph cache tags
+* Added support for XP Cache
+* Added optional frame parameter - control retimes with the frame number instead of speed
+* Updated labels
+
+### 1.0.0  |  31.01.2022
 
 * Initial release
