@@ -5,7 +5,7 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.0.0
+* Current Version: 1.0.1
 
 ## Supported Objects/Tags
 
