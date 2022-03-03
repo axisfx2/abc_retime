@@ -5,7 +5,7 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.0.1
+* Current Version: 1.0.2
 
 ## Supported Objects/Tags
 
@@ -22,6 +22,10 @@
 * Restart Cinema 4D
 
 ## Changes
+
+### 1.0.2  |  22.02.2022
+
+* Updated icon
 
 ### 1.0.1  |  01.02.2022
 
