@@ -5,7 +5,7 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.0.2
+* Current Version: 1.1.0
 
 ## Supported Objects/Tags
 
@@ -22,6 +22,10 @@
 * Restart Cinema 4D
 
 ## Changes
+
+### 1.1.0  |  02.04.2022
+
+* Added support for importing [retime data](https://github.com/axisfx2/cross-platform-retime)
 
 ### 1.0.2  |  22.02.2022
 

@@ -1,5 +1,5 @@
 # built in imports
-import c4d
+import c4d, json
 from math import floor
 
 # tag/object ids
@@ -120,6 +120,12 @@ class abc_retime(c4d.plugins.TagData):
                 elif id == c4d.ABC_RESET_CHILDREN:
                     resetABC(obj)
                     print('reset children')
+
+                elif id == c4d.ABC_IMPORT_RETIME_CLIPBOARD:
+                    import_retime(op, self.doc, True)
+
+                elif id == c4d.ABC_IMPORT_RETIME_FILE:
+                    import_retime(op, self.doc)
 
         return True
 
@@ -260,6 +266,100 @@ class abc_retime(c4d.plugins.TagData):
         elif obj.GetType() == xp_cache:
             obj[c4d.XOCA_CACHE_RETIMING] = 2
             obj[c4d.XOCA_CACHE_TIME] = _output.Get()
+
+def import_retime(op, doc, clipboard=False):
+    '''
+    import data from another application
+    https://github.com/axisfx2/cross-platform-retime
+    '''
+    if clipboard:
+        data = c4d.GetStringFromClipboard()
+
+    else:# file
+        file = get_file()
+
+        if not file:
+            return
+
+        try:
+            with open(file, 'r') as f:
+                data = f.read()
+        except:
+            popup('ERROR: failed to read file')
+            return
+    
+    # verify if data is valid
+    msg = 'ERROR: invalid retime data'
+
+    try:
+        data = json.loads(data)
+    except:
+        popup(msg)
+        return
+
+    if not isinstance(data, list):
+        popup(msg)
+        return
+
+    # find speeds anim track
+    speed_id = c4d.DescID(c4d.DescLevel(c4d.ABC_FRAME))
+    speed_track = op.FindCTrack(speed_id)
+
+    doc.StartUndo()
+
+    # existing anim track - read keyframes
+    if speed_track != None:
+        speed_track.Remove()
+
+    # add track
+    speed_track = c4d.CTrack(op, speed_id)
+
+    op.InsertTrackSorted(speed_track)
+
+    curve = speed_track.GetCurve()
+
+    # time variables
+    fps = doc.GetFps()
+    cur_time = doc.GetMinTime()
+    incr = c4d.BaseTime(1, fps)
+
+    # add keyframes from list
+    for frame in data:
+        time = c4d.BaseTime(float(frame / fps))
+
+        # Creates a keyframe in the memory
+        key = c4d.CKey()
+        
+        # Fills the key with the default data
+        speed_track.FillKey(doc, op, key)
+        
+        # Defines the y value
+        key.SetGeData(curve, time)
+        
+        # Defines the time value
+        key.SetTime(curve, cur_time)
+        
+        # Adds a key on the curve for the given frame
+        curve.InsertKey(key)
+
+        # shift current time by 1 frame
+        cur_time += incr
+
+    # set retime type
+    op[c4d.ABC_RETIME_TYPE] = 1
+
+    doc.EndUndo()
+
+def popup(msg):
+    c4d.gui.MessageDialog(msg)
+
+def get_file():
+    file = c4d.storage.LoadDialog(
+        type=c4d.FILESELECTTYPE_ANYTHING,
+        title='Retime file'
+    )
+
+    return file
 
 def resetABC(op):
     children = IterateHierarchy(op)
