@@ -23,10 +23,12 @@ class abc_retime(c4d.plugins.TagData):
         self.InitAttr(op, bool, c4d.ABC_APPLY_CHILDREN)
         self.InitAttr(op, int, c4d.ABC_RESET_CHILDREN)
         self.InitAttr(op, bool, c4d.ABC_RETIME_TYPE)
-        self.InitAttr(op, c4d.BaseTime, c4d.ABC_FRAME)
+        self.InitAttr(op, float, c4d.ABC_FRAME)
 
         # defaults
         op[c4d.ABC_SPEED] = 1.0
+
+        op[c4d.ABC_RETIME_TYPE] = 1
 
         bc = c4d.BaseContainer()
 
@@ -61,7 +63,7 @@ class abc_retime(c4d.plugins.TagData):
 
         retime_type = node[c4d.ABC_RETIME_TYPE]
 
-        if ID in [c4d.ABC_START_FRAME]:
+        if ID in [c4d.ABC_START_FRAME, c4d.ABC_OFFSET]:
             return not retime_type
 
         # elif ID == c4d.ABC_START_FRAME:
@@ -85,10 +87,14 @@ class abc_retime(c4d.plugins.TagData):
         
         # get basetime from frame parm
         if op[c4d.ABC_RETIME_TYPE]:
-            _output = op[c4d.ABC_FRAME]
-            _output += c4d.BaseTime(
-                op[c4d.ABC_OFFSET], self.fps
+            _output = c4d.BaseTime(
+                op[c4d.ABC_FRAME],
+                self.fps
             )
+
+            # _output += c4d.BaseTime(
+            #     op[c4d.ABC_OFFSET], self.fps
+            # )
 
 
         # calculate frame from speed
@@ -247,6 +253,7 @@ class abc_retime(c4d.plugins.TagData):
             _output -= self.doc_time
 
             tag = obj.GetTag(1019337)
+            cleanTrack(tag, c4d.MGCACHETAG_OFFSET)
             tag[c4d.MGCACHETAG_OFFSET] = _output
 
         # point cache tag
@@ -254,17 +261,20 @@ class abc_retime(c4d.plugins.TagData):
             _output -= self.doc_time
 
             tag = obj.GetTag(1021302)
+            cleanTrack(tag, c4d.ID_CA_GEOMCACHE_TAG_CACHE_OFFSET)
             tag[c4d.ID_CA_GEOMCACHE_TAG_CACHE_OFFSET] = _output
 
         # alembic
         elif obj.GetType() == alembic_obj:
             obj[c4d.ALEMBIC_USE_ANIMATION] = False
             obj[c4d.ALEMBIC_INTERPOLATION] = True
+            cleanTrack(obj, c4d.ALEMBIC_ANIMATION_FRAME)
             obj[c4d.ALEMBIC_ANIMATION_FRAME] = _output
 
         # xp cache
         elif obj.GetType() == xp_cache:
             obj[c4d.XOCA_CACHE_RETIMING] = 2
+            cleanTrack(obj, c4d.XOCA_CACHE_TIME)
             obj[c4d.XOCA_CACHE_TIME] = _output.Get()
 
 def import_retime(op, doc, clipboard=False):
@@ -399,3 +409,14 @@ def IterateHierarchy(op):
         op = GetNextObject(op)
  
     return children
+
+def cleanTrack(op, id):
+    # find speeds anim track
+    speed_id = c4d.DescID(c4d.DescLevel(id))
+    speed_track = op.FindCTrack(speed_id)
+
+    # existing anim track - read keyframes
+    if speed_track != None:
+        speed_track.Remove()
+        return True
+    return False

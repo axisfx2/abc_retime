@@ -5,7 +5,7 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.1.0
+* Current Version: 1.1.1
 
 ## Supported Objects/Tags
 
@@ -22,6 +22,13 @@
 * Restart Cinema 4D
 
 ## Changes
+
+### 1.1.1  |  22.02.2023
+
+* 'Retime using frame number' is enabled by default
+* Playback offset doesn't apply to retime using frame number
+* Frame number key frames are visible in the f-curve
+* Remove keyframe track on the parameter that is being set
 
 ### 1.1.0  |  02.04.2022
 
