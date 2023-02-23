@@ -87,10 +87,7 @@ class abc_retime(c4d.plugins.TagData):
         
         # get basetime from frame parm
         if op[c4d.ABC_RETIME_TYPE]:
-            _output = c4d.BaseTime(
-                op[c4d.ABC_FRAME],
-                self.fps
-            )
+            _output = self.baseTime(op[c4d.ABC_FRAME])
 
             # _output += c4d.BaseTime(
             #     op[c4d.ABC_OFFSET], self.fps
@@ -125,7 +122,6 @@ class abc_retime(c4d.plugins.TagData):
 
                 elif id == c4d.ABC_RESET_CHILDREN:
                     resetABC(obj)
-                    print('reset children')
 
                 elif id == c4d.ABC_IMPORT_RETIME_CLIPBOARD:
                     import_retime(op, self.doc, True)
@@ -134,20 +130,32 @@ class abc_retime(c4d.plugins.TagData):
                     import_retime(op, self.doc)
 
         return True
+    
+    def baseTime(self, frame):
+        '''
+        return unquantized basetime
+        '''
+        value = c4d.BaseTime(frame)
+        value /= self.fps
+        return value
 
     def calcFrame(self):
+        '''
+        calculate and return c4d.BaseTime when speed mode is enabled
+        '''
         # self.op variables
         start_frame = self.start_frame
-        offset = self.op[c4d.ABC_OFFSET]
+        offset = self.baseTime(self.op[c4d.ABC_OFFSET])
         speed = self.op[c4d.ABC_SPEED]
         doc_frame = self.doc_frame
         single_frame = c4d.BaseTime(1, self.fps)
 
-        start_time = c4d.BaseTime(start_frame, self.fps)
+        start_time = self.baseTime(start_frame)
         doc_time = self.doc.GetTime()
         
         # return if playhead before start frame
         if doc_frame < start_frame:
+            start_time += offset
             return start_time, 0.0
         
         _output = start_time
@@ -232,13 +240,12 @@ class abc_retime(c4d.plugins.TagData):
                 _output = start_time + diff
 
         # apply post offset to _output
-        _output += c4d.BaseTime(offset, self.fps)
+        _output += offset
 
         ## get mix values
         Min = floor(_output.GetFrame(self.fps))
 
         _mix = abs(_output.GetFrame(self.fps) - Min)
-        # print(Min, _mix)
         # return (Min - start_frame), _mix
         return _output, _mix
 
@@ -383,22 +390,24 @@ def resetABC(op):
             # xp cache
             elif obj.GetType() == xp_cache:
                 obj[c4d.XOCA_CACHE_TIME] = 0
-
-# hierarchy iteration
-# https://developers.maxon.net/?p=596
-def GetNextObject(op):
-    if op==None:
-        return None
-  
-    if op.GetDown():
-        return op.GetDown()
-  
-    while not op.GetNext() and op.GetUp():
-        op = op.GetUp()
-  
-    return op.GetNext()
  
 def IterateHierarchy(op):
+    '''
+    hierarchy iteration
+    https://developers.maxon.net/?p=596
+    '''
+    def GetNextObject(op):
+        if op==None:
+            return None
+    
+        if op.GetDown():
+            return op.GetDown()
+    
+        while not op.GetNext() and op.GetUp():
+            op = op.GetUp()
+    
+        return op.GetNext()
+    
     if op is None:
         return
  

@@ -5,7 +5,7 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.1.1
+* Current Version: 1.1.2
 
 ## Supported Objects/Tags
 
@@ -18,10 +18,15 @@
 
 * Click the green 'Code' button
 * Click 'Download ZIP'
-* Extract to the Cinema 4D R2X/Plugins folder
+* Extract to the 'Cinema 4D RXX/Plugins folder'
 * Restart Cinema 4D
 
-## Changes
+## Changelog
+
+### 1.1.2  |  23.02.2023
+
+* Fixed quantizing in frame mode
+* Offset applies before start frame (speed mode)
 
 ### 1.1.1  |  22.02.2023
 
