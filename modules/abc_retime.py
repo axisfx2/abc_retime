@@ -6,6 +6,7 @@ from math import floor
 mograph_cache_tag = 1019337
 point_cache_tag = 1021302
 alembic_obj = c4d.Oalembicgenerator
+alembic_tag = 1037184
 xp_cache = 1028775
 
 class abc_retime(c4d.plugins.TagData):
@@ -277,6 +278,13 @@ class abc_retime(c4d.plugins.TagData):
             obj[c4d.ALEMBIC_INTERPOLATION] = True
             cleanTrack(obj, c4d.ALEMBIC_ANIMATION_FRAME)
             obj[c4d.ALEMBIC_ANIMATION_FRAME] = _output
+
+        elif obj.GetTag(alebmic_tag):
+            obj[c4d.ALEMBIC_MT_USE_ANIMATION] = False
+            obj[c4d.ALEMBIC_MT_INTERPOLATION] = True
+            cleanTrack(obj, c4d.ALEMBIC_MT_ANIMATION_FRAME)
+            obj[c4d.ALEMBIC_MT_ANIMATION_FRAME] = _output
+            
 
         # xp cache
         elif obj.GetType() == xp_cache:

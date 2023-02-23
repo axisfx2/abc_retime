@@ -5,13 +5,14 @@
 * Author: Ewan Davidson
 * Email: ewan@axisfx.design
 * Release Date: 31.01.2022
-* Current Version: 1.1.2
+* Current Version: 1.1.3
 
 ## Supported Objects/Tags
 
 * Alembic Object
-* Point Cache Tag
-* Mograph Cache Tag
+* Alembic Tag
+* Point Cache Tag (Changing the offset doesn't seem to be working)
+* Mograph Cache Tag (Changing the offset doesn't seem to be working)
 * X-Particles Cache
 
 ## Installation
@@ -22,6 +23,10 @@
 * Restart Cinema 4D
 
 ## Changelog
+
+### 1.1.3  |  23.02.2023
+
+* Added support for Alembic Tag
 
 ### 1.1.2  |  23.02.2023
 
